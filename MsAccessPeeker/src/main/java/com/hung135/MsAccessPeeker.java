@@ -18,17 +18,16 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author hung
  *
  */
-class test{
-	int t=0;
-	test(int tt){
-		t=tt;
+class test {
+	int t = 0;
+
+	test(int tt) {
+		t = tt;
 	}
-	
-	
+
 }
 
-class maxin {
-
+public class MsAccessPeeker {
 	public static void print_columns(String filePath) throws SQLException {
 		try {
 			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
@@ -52,19 +51,19 @@ class maxin {
 		}
 	}
 
-	public static List<String> getAccessFiles(List<String> dirs,int depth) throws InterruptedException {
+	public static List<String> getAccessFiles(List<String> dirs, int depth) throws InterruptedException {
 
 		List<String> fileList = new ArrayList<>();
 
 		List<String> subDirs = new ArrayList<>();
 
 		for (String directory : dirs) {
-			System.out.println("Looking in :"+directory+"--------");
+			System.out.println("Looking in :" + directory + "--------");
 			File folder = new File(directory);
 			if (directory.toString().equals("/Users/nguyenhu/Desktop/census/2010_AIANSF_MSAccessShell")) {
-				//System.out.println("ohhh");
+				// System.out.println("ohhh");
 
-				//TimeUnit.SECONDS.sleep(5);
+				// TimeUnit.SECONDS.sleep(5);
 			}
 			File[] files = folder.listFiles(new FileFilter() {
 				private final FileNameExtensionFilter filter = new FileNameExtensionFilter("MsAccess files", "mdb",
@@ -84,9 +83,7 @@ class maxin {
 				}
 
 			});
-			
-			
-			
+
 			for (File i : files) {
 				if (i.isFile()) {
 					// System.out.println(i);
@@ -95,14 +92,14 @@ class maxin {
 				} else {
 
 					subDirs.add(i.toString());
-					System.out.println("Adding toRecurse: "+i.toString() );
+					System.out.println("Adding toRecurse: " + i.toString());
 
 				}
 
 			}
 
-			if (subDirs.size() > 0 && depth<3) {
-				List<String> subFiles = getAccessFiles(subDirs,depth+1);
+			if (subDirs.size() > 0 && depth < 3) {
+				List<String> subFiles = getAccessFiles(subDirs, depth + 1);
 
 				for (String i : subFiles) {
 					fileList.add(i.toString());
@@ -113,32 +110,22 @@ class maxin {
 		return fileList;
 	}
 
-	public static void main(String[] args) throws SQLException, InterruptedException {
+	/**
+	 * @param args
+	 * @throws InterruptedException
+	 */
+	public static void main(String[] args) throws InterruptedException {
 		List<String> dirs = new ArrayList<>();
 
 		dirs.add("/Users/nguyenhu/Desktop/");
-		 
 
-		List<String> files = getAccessFiles(dirs,0);
+		List<String> files = getAccessFiles(dirs, 0);
 		// print_columns(filePath);
 
 		for (String i : files) {
-			int ii=1;
-			//System.out.println(i);
+			int ii = 1;
+			// System.out.println(i);
 		}
-
-	}
-
-}
-
-public class MsAccessPeeker {
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		System.out.println("test");
 
 	}
 
