@@ -8,14 +8,8 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.ByteChannel;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -25,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.commons.collections4.ListUtils;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -39,6 +35,9 @@ import net.sourceforge.argparse4j.inf.Namespace;
  *
  */
 class utils {
+
+	private static final String[] FILTER_EXTENSION = { ".exe.mdb", ".dll.mdb" };
+
 	public static void writeLogFile(File fileName, List<String> rowData) throws IOException {
 
 		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName.toString(), true));
@@ -53,28 +52,25 @@ class utils {
 		HashCode hash = com.google.common.io.Files.hash(new File(filename), Hashing.md5());
 		List<String> row = new ArrayList<String>();
 
-	
-		
 		File f = new File(filename);
 		System.out.println("\t" + hash.toString());
 		System.out.println("\tLastModified: " + (new Date(f.lastModified())));
-		
-		if (outLogFile.exists()) {
-			
+
+		if (outLogFile != null && outLogFile.exists()) {
+
 			if (outLogFile != null) {
 				row.add("File: " + filename);
 				row.add("Hash: " + hash.toString());
 				row.add("LastModified: " + (new Date(f.lastModified())));
 				writeLogFile(outLogFile, row);
 			}
-		}
-		else {
-			
+		} else {
+
 			row.add("File,Hash,LastModified");
-			
-			writeLogFile(outLogFile, row);
-			
-			
+			if (outLogFile != null) {
+				writeLogFile(outLogFile, row);
+			}
+
 		}
 	}
 
@@ -96,18 +92,15 @@ class utils {
 
 				public boolean accept(File file) {
 					boolean x = true;
-					if (file.toString().contains("/.py/")) {
-						return false;
+					for (String i : utils.FILTER_EXTENSION) {
+
+						if (file.toString().contains(i)) {
+
+							x = false;
+							return x;
+						}
 					}
-					if (file.toString().contains("/hsqldb-2.4.1")) {
-						return false;
-					}
-					if (file.toString().contains("/DbVisualizer")) {
-						return false;
-					}
-					if (file.toString().contains("/commons-lang")) {
-						return false;
-					}
+
 					x = filter.accept(file);
 					return x;
 				}
@@ -215,17 +208,18 @@ public class MsAccessPeeker {
 		 */
 
 		File outFile = null;
-		for (String name : ns.<String>getList("outfile")) {
+		for (String name : ListUtils.emptyIfNull(ns.<String>getList("outfile"))) {
 			System.out.println(name);
 			outFile = new File(name);
-			
+
 		}
 
-		for (String name : ns.<String>getList("d")) {
+		for (String name : ListUtils.emptyIfNull(ns.<String>getList("d"))) {
 			Path path = Paths.get(name);
 			crawDriectory(path.toString(), outFile);
 
 		}
+		System.out.println("Crawling Complete");
 	}
 
 	/**
@@ -243,13 +237,21 @@ public class MsAccessPeeker {
 		String s = currentRelativePath.toAbsolutePath().toString();
 		System.out.println("Crawling Directory: " + s);
 		dirs.add(s);
-		utils.getAccessFiles(dirs, 0, outLogFile);
+		List<String> filesFound = utils.getAccessFiles(dirs, 0, outLogFile);
+
 		// List<String> files = utils.getAccessFiles(dirs, 0);
 		// print_columns(filePath);
-		/*
-		 * for (String i : files) { int ii = 1; // System.out.println(i); }
-		 */
 
+		for (String i : filesFound) {
+
+			try {
+				print_columns(i);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			// System.out.println(i);
+		}
 	}
 
 }
