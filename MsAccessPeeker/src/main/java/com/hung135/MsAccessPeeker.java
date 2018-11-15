@@ -158,6 +158,70 @@ class utils {
 }
 
 public class MsAccessPeeker {
+	public static void print_procs(String filePath) throws SQLException {
+		try {
+			System.out.println(filePath);
+			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+			Connection conn = DriverManager.getConnection("jdbc:ucanaccess://" + filePath);
+			 
+			try (// ResultSet rsMD = conn.getMetaData().getColumns(null, null, null, null)
+					ResultSet rsMD = conn.getMetaData().getProcedures(null, null, null)
+
+			) {
+				int i = 0;
+
+				while (rsMD.next()) {
+
+					System.out.println(rsMD.getString("PROCEDURE_NAME"));
+					i++;
+
+				}
+				System.out.println("Total" + i);
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public static void print_tables(String filePath) throws SQLException {
+		try {
+			System.out.println(filePath);
+			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+			Connection conn = DriverManager.getConnection("jdbc:ucanaccess://" + filePath);
+			/*
+			 * Each table description has the following columns:
+			 * 
+			 * TABLE_CAT String => table catalog (may be null) TABLE_SCHEM String => table
+			 * schema (may be null) TABLE_NAME String => table name TABLE_TYPE String =>
+			 * table type. Typical types are "TABLE", "VIEW", "SYSTEM TABLE",
+			 * "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM". REMARKS String =>
+			 * explanatory comment on the table TYPE_CAT String => the types catalog (may be
+			 * null) TYPE_SCHEM String => the types schema (may be null) TYPE_NAME String =>
+			 * type name (may be null) SELF_REFERENCING_COL_NAME String => name of the
+			 * designated "identifier" column of a typed table (may be null) REF_GENERATION
+			 * String => specifies how values in SELF_REFERENCING_COL_NAME are created.
+			 * Values are "SYSTEM", "USER", "DERIVED". (may be null)
+			 */
+			try (// ResultSet rsMD = conn.getMetaData().getColumns(null, null, null, null)
+					ResultSet rsMD = conn.getMetaData().getTables(null, null, null, null)
+
+			) {
+				int i = 0;
+
+				while (rsMD.next()) {
+
+					System.out.println(rsMD.getString("TABLE_NAME"));
+					i++;
+
+				}
+				System.out.println("Total" + i);
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public static void print_columns(String filePath) throws SQLException {
 		try {
 			System.out.println(filePath);
@@ -167,12 +231,22 @@ public class MsAccessPeeker {
 			try (ResultSet rsMD = conn.getMetaData().getColumns(null, null, null, null)) {
 
 				int i = 0;
+				int ii = 0;
 				while (rsMD.next()) {
+					if (i == 0) {
+						System.out.print("Create table " + rsMD.getString("TABLE_NAME"));
+					}
+					if (ii == 3) {
+						System.out.print("\n");
+						ii = 0;
+					}
+
 					String colName = rsMD.getString("COLUMN_NAME");
-					String tblName = rsMD.getString("TABLE_NAME");
-					String dataType = rsMD.getString("DATA_TYPE");
-					System.out.println(tblName + ",\t" + colName + ",\t" + dataType);
+					// String tblName = rsMD.getString("TABLE_NAME");
+					String dataType = rsMD.getString("TYPE_NAME");
+					System.out.print(colName + "\t as " + dataType + ", ");
 					i++;
+					ii++;
 				}
 				System.out.println("Total Columns: " + i);
 			}
@@ -246,7 +320,9 @@ public class MsAccessPeeker {
 		for (String i : filesFound) {
 
 			try {
-				print_columns(i);
+				//print_columns(i);
+				print_tables(i);
+				print_procs(i);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
