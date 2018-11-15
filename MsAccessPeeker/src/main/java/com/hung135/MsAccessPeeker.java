@@ -160,6 +160,7 @@ class utils {
 public class MsAccessPeeker {
 	public static void print_columns(String filePath) throws SQLException {
 		try {
+			System.out.println(filePath);
 			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
 			Connection conn = DriverManager.getConnection("jdbc:ucanaccess://" + filePath);
 
